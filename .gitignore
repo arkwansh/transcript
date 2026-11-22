@@ -1,0 +1,11 @@
+.DS_Store
+给朋友的信.md
+__pycache__/
+*.py[cod]
+launch.log
+*.zip
+*.part
+*.egg-info/
+.venv/
+venv/
+build/

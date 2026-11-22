@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>稿</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#14181B;
+    --ink-2:#1E2429;
+    --ink-3:#2A3238;
+    --paper:#F6F5F2;
+    --paper-2:#EFEDE8;
+    --rule:#DDDAD2;
+    --moss:#3F6B54;
+    --moss-soft:#E4EDE6;
+    --lead:#6E7372;
+    --lead-2:#9AA09D;
+    --vermilion:#A6502B;
+    --song:"Songti SC","Source Han Serif SC","Noto Serif SC",serif;
+    --hei:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  html,body{overflow-x:hidden}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--hei);font-size:16px;
+    -webkit-font-smoothing:antialiased;
+    display:grid;grid-template-columns:290px 1fr;grid-template-rows:64px 1fr;
+    height:100vh;overflow:hidden;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  header{
+    grid-column:1/-1;display:flex;align-items:center;gap:22px;
+    padding:0 22px;background:var(--ink);color:#E8E6E1;
+    border-bottom:1px solid #000;
+  }
+  .mark{font-family:var(--song);font-size:26px;font-weight:600;letter-spacing:.06em;color:#F2EFE9;line-height:1}
+  .mark span{display:block;font-family:var(--hei);font-size:10.5px;letter-spacing:.22em;color:#7C847F;margin-top:4px;font-weight:400}
+  .urlbar{flex:1;display:flex;gap:8px;max-width:760px}
+  .urlbar input{
+    flex:1;background:var(--ink-2);border:1px solid #333B41;color:#EFEDE8;
+    padding:9px 13px;border-radius:2px;font-family:var(--hei);font-size:13.5px;outline:none;
+  }
+  .urlbar input::placeholder{color:#68706C}
+  .urlbar input:focus{border-color:var(--moss)}
+  button{
+    font-family:var(--hei);font-size:13px;cursor:pointer;border:1px solid #383F45;
+    background:var(--ink-3);color:#DCDAD4;padding:9px 16px;border-radius:2px;
+    transition:background .14s,border-color .14s;
+  }
+  button:hover{background:#343D44;border-color:#4A545B}
+  button:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+  button.primary{background:var(--moss);border-color:var(--moss);color:#F4F8F4;font-weight:500}
+  button.primary:hover{background:#48785F}
+  button.ghost{background:transparent}
+  button:disabled{opacity:.42;cursor:default}
+
+  /* ---------- 书脊 ---------- */
+  aside{
+    background:var(--ink-2);border-right:1px solid #000;overflow-y:auto;
+    display:flex;flex-direction:column;
+  }
+  aside::-webkit-scrollbar{width:8px}
+  aside::-webkit-scrollbar-thumb{background:#39424A;border-radius:4px}
+  .aside-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 10px;position:sticky;top:0;background:var(--ink-2);z-index:2;
+  }
+  .aside-head h2{font-size:11px;letter-spacing:.2em;color:#7C847F;margin:0;font-weight:500}
+  .count{font-family:var(--mono);font-size:11px;color:#5E6764}
+  .job-more .qc{
+    background:transparent;border:none;color:#8E9691;font-family:var(--hei);
+    font-size:11px;padding:0;cursor:pointer;text-decoration:underline;
+    text-decoration-color:#4A545B;text-underline-offset:3px;
+  }
+  .job-more .qc:hover{background:transparent;color:#D98A6C;border:none}
+
+  .job{
+    margin:0 14px 14px;padding:12px 13px;border:1px solid #3A434A;
+    border-left:2px solid var(--moss);background:#212831;position:relative;
+  }
+  .job .x{
+    position:absolute;top:5px;right:5px;background:transparent;border:none;
+    color:#68716D;font-size:15px;line-height:1;padding:4px 7px;border-radius:2px;cursor:pointer;
+  }
+  .job .x:hover{background:#3A434A;color:#E4E2DC}
+  .job .stage{padding-right:22px}
+  .job .stage{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;color:#B9C2BD;margin-bottom:8px}
+  .job .stage b{
+    color:#EAF0EA;font-weight:500;flex:1;min-width:0;line-height:1.55;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .job .stage span{flex:none;font-family:var(--mono);font-size:11px;white-space:nowrap}
+  .bar{height:2px;background:#333C43;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--moss);width:0;transition:width .5s ease}
+  .job .log{font-family:var(--mono);font-size:10.5px;color:#77817C;margin-top:9px;line-height:1.6;
+    max-height:74px;overflow:hidden;display:flex;flex-direction:column-reverse}
+  .job.err{border-left-color:var(--vermilion)}
+  .job.err .log{color:#C98A70}
+  .job.stop{border-left-color:#4A545B;opacity:.55}
+  .job.stop .log{color:#6E7773}
+  .job.wait{border-left-color:#4A545B}
+  .job.wait .bar i{background:#4A545B}
+  .job.wait .stage b{color:#C6CCC8;font-weight:400}
+  .job-more{font-family:var(--mono);font-size:10.5px;color:#6E7773;margin:-6px 14px 14px;padding-left:13px}
+
+  .entry{
+    padding:13px 18px;border-bottom:1px solid #262E34;cursor:pointer;
+    display:block;border-left:2px solid transparent;transition:background .12s;position:relative;
+  }
+  .entry:hover{background:#232B32}
+  .entry .del{
+    position:absolute;top:8px;right:6px;background:transparent;border:none;
+    color:#5E6764;font-size:14px;line-height:1;padding:3px 6px;cursor:pointer;
+    opacity:0;transition:opacity .12s;border-radius:2px;
+  }
+  .entry:hover .del{opacity:1}
+  .entry .del:hover{background:#3A434A;color:#D98A6C}
+  .entry h3{padding-right:22px}
+  .entry.on{background:#29323A;border-left-color:var(--moss)}
+  .entry h3{
+    font-family:var(--song);font-size:14.5px;line-height:1.55;margin:0 0 6px;font-weight:600;
+    color:#E4E2DC;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .entry .m{font-size:11px;color:#78817D;display:flex;gap:10px;font-family:var(--mono)}
+  .entry .m .who{font-family:var(--hei);color:#8E9691;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .empty-side{padding:26px 18px;font-size:12.5px;color:#6C7571;line-height:1.9}
+
+  /* ---------- 正文 ---------- */
+  main{overflow-y:auto;overflow-x:hidden;position:relative;min-width:0}
+  main::-webkit-scrollbar{width:11px}
+  main::-webkit-scrollbar-thumb{background:#D3CFC6;border-radius:6px;border:3px solid var(--paper)}
+
+  .welcome{
+    max-width:520px;margin:0 auto;padding:14vh 40px 60px;text-align:left;
+  }
+  .welcome .big{font-family:var(--song);font-size:40px;line-height:1.35;margin:0 0 20px;font-weight:600;letter-spacing:.01em}
+  .welcome p{color:var(--lead);line-height:2;margin:0 0 14px;font-size:14.5px}
+  .steps{margin:34px 0 0;padding:0;list-style:none;border-top:1px solid var(--rule)}
+  .steps li{padding:15px 0;border-bottom:1px solid var(--rule);display:flex;gap:16px;font-size:13.5px;color:#4E5452;line-height:1.75}
+  .steps b{font-family:var(--mono);color:var(--moss);font-weight:500;min-width:22px}
+
+  .doc{max-width:720px;margin:0 auto;padding:64px 48px 160px;min-width:0}
+  .doc-head{border-bottom:1px solid var(--rule);padding-bottom:26px;margin-bottom:40px}
+  .doc-head h1{font-family:var(--song);font-size:31px;line-height:1.45;margin:0 0 16px;font-weight:600;letter-spacing:.005em}
+  .doc-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--lead);align-items:center}
+  .doc-meta .kv{font-family:var(--mono);color:#3E4442}
+  .doc-meta a{color:var(--moss);text-decoration:none;border-bottom:1px solid #BFD3C4}
+  .doc-meta a:hover{border-bottom-color:var(--moss)}
+  .toolbar{display:flex;gap:8px;margin-top:20px}
+  .toolbar button{
+    background:transparent;border:1px solid var(--rule);color:#555C58;font-size:12px;padding:7px 13px;
+  }
+  .toolbar button:hover{background:var(--paper-2);border-color:#C8C4BB}
+
+  .para{
+    position:relative;font-size:17px;line-height:1.95;margin:0 0 1.35em;
+    letter-spacing:.012em;color:#1B1F1E;text-align:justify;text-justify:inter-ideograph;
+  }
+  .para .ts,
+  .para > a.ts{
+    position:absolute;left:-78px;top:.55em;font-family:var(--mono);font-size:11px;
+    color:var(--lead-2);text-decoration:none;opacity:0;transition:opacity .15s;letter-spacing:.02em;
+    display:inline-block;
+  }
+  .para:hover .ts{opacity:1}
+  .para .ts:hover{color:var(--moss)}
+  .para mark{background:#DFE9D8;color:inherit;padding:.06em 0}
+
+  /* ---------- 摘抄夹 ---------- */
+  .clips{
+    position:fixed;right:0;top:64px;bottom:0;width:330px;background:var(--paper-2);
+    box-sizing:border-box;contain:layout;
+    border-left:1px solid var(--rule);transform:translateX(100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;z-index:30;
+  }
+  .clips.open{transform:none}
+  .clips-head{padding:20px 22px 14px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:baseline}
+  .clips-head h2{font-family:var(--song);font-size:16px;margin:0;font-weight:600}
+  .clips-head span{font-family:var(--mono);font-size:11px;color:var(--lead)}
+  .clips-body{flex:1;overflow-y:auto;padding:8px 22px 30px}
+  .clip{border-bottom:1px solid var(--rule);padding:15px 0;position:relative}
+  .clip p{font-family:var(--song);font-size:14px;line-height:1.9;margin:0 0 8px;color:#2B302E}
+  .clip .cf{font-family:var(--mono);font-size:10.5px;color:var(--lead-2);display:flex;justify-content:space-between}
+  .clip .cf button{background:none;border:none;color:var(--lead-2);font-size:11px;padding:0;cursor:pointer}
+  .clip .cf button:hover{color:var(--vermilion)}
+  .clip-empty{color:var(--lead);font-size:13px;line-height:2;padding:16px 0}
+
+  /* ---------- 选中气泡 ---------- */
+  .pop{
+    position:fixed;z-index:60;background:var(--ink);border:1px solid #333B41;
+    display:none;padding:5px;gap:2px;box-shadow:0 6px 20px rgba(0,0,0,.22);
+  }
+  .pop.on{display:flex}
+  .pop button{background:transparent;border:none;color:#D5D2CB;font-size:12.5px;padding:7px 12px;border-radius:1px}
+  .pop button:hover{background:var(--moss);color:#fff}
+
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translate(-50%,14px);background:var(--ink);
+    color:#E9E6DF;font-size:13px;padding:11px 20px;border-radius:2px;opacity:0;
+    transition:opacity .2s,transform .2s;pointer-events:none;z-index:80;
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  dialog{
+    border:none;background:var(--paper);padding:0;border-radius:2px;
+    box-shadow:0 18px 60px rgba(0,0,0,.28);max-width:520px;width:92vw;
+  }
+  dialog::backdrop{background:rgba(20,24,27,.42)}
+  .dlg{padding:28px 30px 24px}
+  .dlg h3{font-family:var(--song);font-size:19px;margin:0 0 20px;font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--rule);font-size:13.5px}
+  .row:last-of-type{border-bottom:none}
+  .row label{color:#3C4240}
+  .row small{display:block;color:var(--lead);font-size:11.5px;margin-top:3px;font-family:var(--hei)}
+  .row select{font-family:var(--hei);font-size:13px;padding:6px 10px;border:1px solid var(--rule);background:#fff;border-radius:2px;color:var(--ink)}
+  .row input.tx{
+    font-family:var(--mono);font-size:12.5px;padding:6px 9px;border:1px solid var(--rule);
+    background:#fff;border-radius:2px;color:var(--ink);width:190px;outline:none;
+  }
+  .row input.tx:focus{border-color:var(--moss)}
+  .dlg-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+  .dlg-foot button{border:1px solid var(--rule);background:#fff;color:#3C4240}
+  .dlg-foot button.primary{background:var(--moss);border-color:var(--moss);color:#fff}
+
+  /* ---------- 找同版 ---------- */
+  .seek{max-width:720px;margin:0 auto;padding:8vh 48px 90px}
+  .seek h1{font-family:var(--song);font-size:28px;line-height:1.5;margin:0 0 12px;font-weight:600}
+  .seek .lead{color:var(--lead);font-size:14px;line-height:1.95;margin:0 0 26px;max-width:560px}
+  .seek-row{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--ink);padding-bottom:2px;max-width:600px}
+  .seek-row input{
+    flex:1;border:none;background:transparent;outline:none;font-family:var(--hei);
+    font-size:16.5px;color:var(--ink);padding:11px 1px;
+  }
+  .seek-row input::placeholder{color:var(--lead-2)}
+  .seek-row button{background:transparent;border:none;color:var(--moss);font-size:13.5px;padding:8px 2px}
+  .seek-row button:hover{background:transparent;text-decoration:underline;border-color:transparent}
+  .hintline{font-size:11.5px;color:var(--lead-2);margin:11px 0 0;font-family:var(--mono);letter-spacing:.01em}
+
+  .res{margin-top:34px;border-top:1px solid var(--rule)}
+  .res-item{display:flex;gap:16px;padding:15px 2px;border-bottom:1px solid var(--rule);cursor:pointer;align-items:flex-start}
+  .res-item:hover{background:var(--paper-2)}
+  .res-item:focus-visible{outline:2px solid var(--moss);outline-offset:-2px}
+  .res-item.picked{cursor:default;background:var(--moss-soft)}
+  .res-item.picked:hover{background:var(--moss-soft)}
+  .res-item.picked .res-body h3{color:#3C4A43}
+  .res-item.picked .res-thumb{opacity:.6}
+  .done-tag{
+    color:var(--moss);font-family:var(--hei);font-size:11px;
+    border:1px solid #BFD3C4;background:#EAF1EC;padding:1px 6px;border-radius:2px;
+  }
+  .picked-note{
+    font-size:12.5px;color:var(--moss);background:var(--moss-soft);
+    border-left:2px solid var(--moss);padding:9px 14px;margin:26px 0 0;line-height:1.7;
+  }
+  .res-thumb{width:116px;flex:none;aspect-ratio:16/9;background:var(--paper-2);object-fit:cover;display:block}
+  .res-thumb.none{
+    display:flex;align-items:center;justify-content:center;font-family:var(--mono);
+    font-size:10.5px;color:var(--lead-2);letter-spacing:.14em;border:1px solid var(--rule);
+  }
+  .res-body{min-width:0;flex:1}
+  .res-body h3{
+    font-size:14.5px;line-height:1.65;margin:0 0 7px;font-weight:500;color:#22282A;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .res-body .rm{display:flex;gap:12px;font-size:11.5px;color:var(--lead);font-family:var(--mono);flex-wrap:wrap}
+  .res-body .rm .p{color:var(--moss)}
+  .seek-empty{padding:28px 0;font-size:13.5px;color:var(--lead);line-height:2;max-width:600px}
+  .seek-empty a{color:var(--moss);text-decoration:none;border-bottom:1px solid #BFD3C4}
+  .seek-empty a:hover{border-bottom-color:var(--moss)}
+  .spin{
+    display:inline-block;width:9px;height:9px;border:1px solid var(--lead-2);border-top-color:var(--moss);
+    border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:8px;
+  }
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* ---------- 拖文件进来 ---------- */
+  .drop{
+    position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;
+    background:rgba(246,245,242,.94);
+  }
+  body.dragging .drop{display:flex}
+  .drop-in{border:1px dashed var(--moss);padding:54px 78px;text-align:center;background:var(--paper)}
+  .drop-in b{display:block;font-family:var(--song);font-size:24px;margin-bottom:10px;font-weight:600}
+  .drop-in span{font-size:13px;color:var(--lead)}
+
+  .job .acts{display:flex;gap:6px;margin-top:10px}
+  .job .acts button{flex:1;font-size:11px;padding:5px 7px;background:transparent;border:1px solid #4A545B;color:#B9C2BD}
+  .job .acts button:hover{background:#343D44;border-color:var(--moss);color:#E4E2DC}
+  .urlbar button{flex:none}
+
+  /* 侧栏开关，窄窗才出现 */
+  .shelfToggle{display:none}
+  .scrim{display:none}
+
+  @media (max-width:1120px){
+    body{grid-template-columns:250px 1fr}
+    .doc{padding:52px 34px 150px}
+    .para .ts{left:auto;right:-58px;top:.5em;opacity:0}
+  }
+
+  @media (max-width:860px){
+    body{grid-template-columns:1fr;grid-template-rows:56px 1fr}
+    header{padding:0 12px;gap:10px}
+    .mark{font-size:21px}
+    .mark span{display:none}
+    .shelfToggle{display:inline-block}
+    .grid-btn{display:none}
+    aside{
+      position:fixed;left:0;top:56px;bottom:0;width:264px;z-index:50;
+      transform:translateX(-100%);transition:transform .2s ease;
+    }
+    body.shelf-open aside{transform:none}
+    .scrim{
+      display:block;position:fixed;inset:56px 0 0 0;background:rgba(20,24,27,.38);
+      opacity:0;pointer-events:none;transition:opacity .2s;z-index:45;
+    }
+    body.shelf-open .scrim{opacity:1;pointer-events:auto}
+    .doc{padding:34px 20px 130px;max-width:100%}
+    .doc-head h1{font-size:25px}
+    .para{font-size:16.5px;line-height:1.9;text-align:left}
+    .para .ts{position:static;opacity:1;margin-right:.55em;font-size:10.5px;color:#A8ADA9}
+    .para:hover .ts{color:var(--moss)}
+    .clips{width:min(340px,88vw);top:56px}
+    .seek{padding:5vh 20px 70px}
+    .seek h1{font-size:24px}
+    .seek-row{max-width:none}
+    .res-item{gap:12px}
+    .res-thumb{width:86px}
+    .res-body h3{font-size:13.5px}
+    .welcome{padding:9vh 22px 50px}
+    .welcome .big{font-size:29px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="ghost shelfToggle" id="shelfBtn">稿件库</button>
+  <div class="mark">稿<span>TRANSCRIPT</span></div>
+  <div class="urlbar">
+    <input id="url" type="text" placeholder="粘贴视频链接，或直接贴标题让我去找同版" autocomplete="off" spellcheck="false">
+    <button class="primary" id="go">转写</button>
+    <button class="ghost" id="pick" title="转写本机上的视频或音频">选文件</button>
+  </div>
+  <button class="ghost" id="clipToggle">摘抄<span class="grid-btn">夹</span></button>
+  <button class="ghost" id="settings" title="设置">设置</button>
+</header>
+
+<aside>
+  <div class="aside-head">
+    <h2>稿件库</h2>
+    <span class="count" id="count">0</span>
+  </div>
+  <div id="jobs"></div>
+  <div id="list"></div>
+</aside>
+
+<div class="scrim" id="scrim"></div>
+
+<main id="main">
+  <div class="welcome">
+    <p class="big">给一个链接，<br>拿回一份能慢慢读的稿。</p>
+    <p>音频在本机转写，不上传任何地方。转完自动分段，可摘抄、可导出，也可以把选中的段落整理成提问，交给 AI 换个角度看。</p>
+    <ul class="steps">
+      <li><b>一</b><span>把链接贴进上面那一栏，点转写。</span></li>
+      <li><b>二</b><span>视频号、小红书这类抓不到媒体文件的，就把标题贴进去点转写 — 我去 B站 和 YouTube 找同版。</span></li>
+      <li><b>三</b><span>手里已经有视频的，直接拖进这个窗口也能转。几条一起贴会自动排队，一小时视频大约二十分钟。</span></li>
+    </ul>
+  </div>
+</main>
+
+<div class="drop" id="drop">
+  <div class="drop-in">
+    <b>松手就转写</b>
+    <span>视频、音频都行 —— 视频号抓下来的片子、手机上的录音，都可以</span>
+  </div>
+</div>
+
+<input type="file" id="file" accept="video/*,audio/*,.mp4,.mov,.mkv,.webm,.m4a,.mp3,.wav,.aac,.flac,.ogg" multiple hidden>
+
+<div class="clips" id="clips">
+  <div class="clips-head">
+    <h2>摘抄夹</h2>
+    <span id="clipCount">0 条</span>
+  </div>
+  <div class="clips-body" id="clipBody">
+    <p class="clip-empty">读稿时选中文字，点「摘抄」就会落到这里。攒够几条，可以一次性复制成一份提问清单。</p>
+  </div>
+</div>
+
+<div class="pop" id="pop">
+  <button data-act="copy">复制</button>
+  <button data-act="clip">摘抄</button>
+  <button data-act="ask">问 AI</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h3>设置</h3>
+    <div class="row">
+      <label>字幕优先<small>平台上有现成字幕就直接取，几秒钟出稿；关掉就一律本机转写</small></label>
+      <select id="cfgSubs">
+        <option value="1">用，有就用</option>
+        <option value="0">不用，一律转写</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>转写模型<small>越小越快，small 适合日常，medium 慢一倍更准</small></label>
+      <select id="cfgModel">
+        <option value="tiny">tiny 极快</option>
+        <option value="base">base 快</option>
+        <option value="small">small 推荐</option>
+        <option value="medium">medium 精确</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>语言<small>自动判别多数情况都对；识别偏了再手动指定</small></label>
+      <select id="cfgLang">
+        <option value="auto">自动</option>
+        <option value="zh">中文</option>
+        <option value="en">英文</option>
+        <option value="ja">日文</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>同时转写<small>2 通常最划算：一边下载一边转写；再多每篇都会变慢</small></label>
+      <select id="cfgJobs">
+        <option value="1">1 个</option>
+        <option value="2">2 个</option>
+        <option value="3">3 个</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>每段字数<small>越小越碎，越大越成块</small></label>
+      <select id="cfgChars">
+        <option value="100">100 字</option>
+        <option value="140">140 字</option>
+        <option value="200">200 字</option>
+        <option value="280">280 字</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>停顿断段<small>说话停顿超过这么久就另起一段</small></label>
+      <select id="cfgPause">
+        <option value="0.5">0.5 秒</option>
+        <option value="0.9">0.9 秒</option>
+        <option value="1.5">1.5 秒</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>浏览器 Cookie<small>抖音、TikTok 多半要登录态才给下载。选平时登录着那个浏览器</small></label>
+      <select id="cfgCookie">
+        <option value="">不用</option>
+        <option value="chrome">Chrome</option>
+        <option value="safari">Safari</option>
+        <option value="edge">Edge</option>
+        <option value="firefox">Firefox</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>代理<small>留空就走系统设置。TikTok 打不开常是出口 IP 的事</small></label>
+      <input class="tx" id="cfgProxy" type="text" placeholder="socks5://127.0.0.1:7890" spellcheck="false">
+    </div>
+    <div class="dlg-foot">
+      <button id="dlgClose">关闭</button>
+      <button class="primary" id="dlgSave">保存</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const state = { items:[], current:null, poll:null, sel:'', jobs:{}, seek:null, pendingOpen:false };
+const CLIP_KEY = 'gaozhi.clips.v1';
+
+/* ---------- 持久化（只存摘抄，本机） ---------- */
+let clips = [];
+try { clips = JSON.parse(localStorage.getItem(CLIP_KEY) || '[]'); } catch(e){ clips = []; }
+function saveClips(){ localStorage.setItem(CLIP_KEY, JSON.stringify(clips)); renderClips(); }
+
+/* ---------- 工具 ---------- */
+function fmt(sec){
+  sec = Math.floor(sec||0);
+  const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60;
+  const p = n => String(n).padStart(2,'0');
+  return h ? `${p(h)}:${p(m)}:${p(s)}` : `${p(m)}:${p(s)}`;
+}
+function esc(t){ return (t||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function num(n){
+  n = Number(n)||0;
+  if (!n) return '';
+  if (n >= 1e8) return (n/1e8).toFixed(1)+'亿';
+  if (n >= 1e4) return (n/1e4).toFixed(n >= 1e5 ? 0 : 1)+'万';
+  return String(n);
+}
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 1900);
+}
+
+/* ---------- 稿件库 ---------- */
+async function loadLib(){
+  const r = await fetch('/api/library'); const data = await r.json();
+  state.items = data.items || [];
+  $('#count').textContent = state.items.length;
+  renderList();
+}
+function renderList(){
+  const box = $('#list');
+  if (!state.items.length){ box.innerHTML = ''; return; }
+  box.innerHTML = state.items.map(it => `
+    <div class="entry ${state.current===it.id?'on':''}" data-id="${it.id}">
+      <button class="del" data-del="${it.id}" title="删除这篇稿">×</button>
+      <h3>${esc(it.title)}</h3>
+      <div class="m">
+        <span class="who">${esc(it.author||it.source||'')}</span>
+        <span>${fmt(it.duration)}</span>
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('.entry').forEach(el=>{
+    el.onclick = e=>{ if (!e.target.closest('[data-del]')) openItem(el.dataset.id); };
+  });
+  box.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick = e=>{ e.stopPropagation(); delItem(b.dataset.del); };
+  });
+}
+
+async function delItem(id){
+  const it = state.items.find(i=>i.id===id);
+  const name = it ? `《${it.title}》` : '这篇稿';
+  if (!confirm(`删掉${name}？\n\n转写结果会没，原始视频不受影响。`)) return;
+  await fetch('/api/item/'+id, {method:'DELETE'});
+  state.items = state.items.filter(i=>i.id!==id);
+  $('#count').textContent = state.items.length;
+  if (state.current === id){
+    state.current = null;
+    $('#main').innerHTML = '<div class="welcome"><p class="big">已删除。</p><p>链接还在你手上，随时可以重新转。</p></div>';
+  }
+  renderList();
+  toast('已删除');
+}
+
+/* ---------- 打开一篇 ---------- */
+async function openItem(id){
+  const r = await fetch('/api/item/'+id);
+  if (!r.ok){ toast('这篇稿不在了'); return; }
+  const it = await r.json();
+  state.current = id;
+  renderList();
+  renderDoc(it);
+  if (window.innerWidth <= 860) document.body.classList.remove('shelf-open');
+}
+
+function renderDoc(it){
+  const m = $('#main');
+  const metaBits = [];
+  if (it.author) metaBits.push(`<span class="kv">${esc(it.author)}</span>`);
+  metaBits.push(`<span>${fmt(it.duration)}</span>`);
+  metaBits.push(`<span>${it.chars||(it.text||'').length} 字</span>`);
+  if (it.model) metaBits.push(`<span class="kv">${esc(it.model)}</span>`);
+  if (it.url) metaBits.push(`<a href="${esc(it.url)}" target="_blank" rel="noopener">原始视频</a>`);
+
+  m.innerHTML = `
+    <article class="doc">
+      <div class="doc-head">
+        <h1>${esc(it.title||'未命名')}</h1>
+        <div class="doc-meta">${metaBits.join('<span style="color:#CFCBC2">·</span>')}</div>
+        <div class="toolbar">
+          <button id="exportBtn">导出 Markdown</button>
+          <button id="copyAll">复制全文</button>
+          <button id="delBtn">删除</button>
+        </div>
+      </div>
+      ${(it.paragraphs||[]).map((p,i)=>`
+        <p class="para" data-i="${i}" data-start="${p.start||0}">
+          <a class="ts" href="#" data-t="${p.start||0}">${fmt(p.start)}</a>${esc(p.text)}
+        </p>`).join('')}
+    </article>`;
+
+  m.scrollTop = 0;
+  $('#exportBtn').onclick = ()=>{ location.href = `/api/item/${it.id}/export`; };
+  $('#copyAll').onclick = async ()=>{
+    await navigator.clipboard.writeText(it.title + '\n\n' + (it.paragraphs||[]).map(p=>p.text).join('\n\n'));
+    toast('全文已复制');
+  };
+  $('#delBtn').onclick = async ()=>{
+    if (!confirm('删掉这篇稿？原文还在视频里，但转写结果会没。')) return;
+    await fetch('/api/item/'+it.id, {method:'DELETE'});
+    state.current = null;
+    m.innerHTML = '<div class="welcome"><p class="big">已删除。</p><p>链接还在你手上，随时可以重新转。</p></div>';
+    loadLib();
+  };
+  m.querySelectorAll('.ts').forEach(a=>{
+    a.onclick = e=>{ e.preventDefault(); toast('原片时间 '+fmt(a.dataset.t)); };
+  });
+}
+
+/* ---------- 发起转写：可以连着贴，超出的排队 ---------- */
+function addJob(id, url, title){
+  state.jobs[id] = { id, url: url||'', title: title||'', stage:'排队',
+                     percent:0, ahead:0, log:[], created: Date.now()/1000 };
+  renderJobs(); ensurePoll();
+}
+
+async function startUrl(url){
+  try{
+    const r = await fetch('/api/transcribe', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({url})
+    });
+    const data = await r.json();
+    if (data.locked){
+      openSeek('', `「${data.locked}」的视频文件锁在播放器里，取不到。把标题贴进来，我去别处找同版；手上有片子的话，也可以直接拖进窗口。`);
+      return '';
+    }
+    if (data.error){ toast(data.error); return ''; }
+    if (data.dup){
+      // 同一条已经在跑，服务端没有再建任务。界面上把它接回来就行。
+      if (!state.jobs[data.job]){
+        addJob(data.job, url, '');
+      }
+      return data.job;
+    }
+    addJob(data.job, url, '');
+    state.pendingOpen = true;
+    return data.job;
+  }catch(e){
+    toast('服务没有响应，看下终端');
+    return '';
+  }
+}
+
+async function startJob(){
+  const raw = $('#url').value.trim();
+  if (!raw) { $('#url').focus(); return; }
+  // 不是链接就是标题：直接当关键词去搜同版，省一次来回
+  if (!/^https?:\/\//i.test(raw)){
+    $('#url').value = '';
+    openSeek(raw, '这行不是链接，我当标题用了 —— 去 B站 和 YouTube 找同版。');
+    return;
+  }
+  const btn = $('#go'); btn.disabled = true;
+  const ok = await startUrl(raw);
+  btn.disabled = false;
+  if (ok){ $('#url').value = ''; $('#url').focus(); }
+}
+
+/* ---------- 本地文件：拖进来或点选 ---------- */
+function uploadFiles(files){
+  for (const f of Array.from(files || [])){
+    if (!f) continue;
+    const tmp = 'up' + Math.random().toString(36).slice(2, 8);
+    const base = f.name.replace(/\.[^.]+$/, '');
+    state.jobs[tmp] = { id: tmp, url:'', title: f.name, stage:'上传', percent:2,
+                        log:['读入本机文件'], created: Date.now()/1000, _up:true };
+    renderJobs(); ensurePoll();
+
+    const fd = new FormData();
+    fd.append('file', f);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable && state.jobs[tmp]){
+        state.jobs[tmp].percent = Math.min(7, Math.round(e.loaded / e.total * 7));
+        renderJobs();
+      }
+    };
+    xhr.onload = () => {
+      let data = {};
+      try{ data = JSON.parse(xhr.responseText || '{}'); }catch(e){}
+      delete state.jobs[tmp];
+      if (data.job){ addJob(data.job, '', base); state.pendingOpen = true; }
+      else { renderJobs(); toast(data.error || '这个文件没传上去'); }
+    };
+    xhr.onerror = () => { delete state.jobs[tmp]; renderJobs(); toast('上传失败，服务还在跑吗'); };
+    xhr.send(fd);
+  }
+}
+
+/* ---------- 找同版：B站 / YouTube ---------- */
+function openSeek(q, note){
+  state.seek = { q: q||'', note: note||'', cands:null, busy:false };
+  renderSeek();
+  if (q) runSeek();
+}
+
+function renderSeek(){
+  const s = state.seek || { q:'', note:'', cands:null, busy:false };
+
+  let body = '';
+  if (s.busy){
+    body = `<div class="seek-empty"><span class="spin"></span>正在 B站 和 YouTube 搜，两条路同时走…</div>`;
+  } else if (s.cands && s.cands.length){
+    const picked = s.picked || {};
+    const nPicked = Object.keys(picked).length;
+    body = (nPicked ? `<div class="picked-note">已开始 ${nPicked} 条，左边能看到进度。想换一条直接点别的就行。</div>` : '')
+      + `<div class="res">` + s.cands.map((c,i)=>{
+        const on = !!picked[i];
+        return `
+      <div class="res-item ${on?'picked':''}" data-i="${i}" tabindex="0">
+        ${c.cover
+          ? `<img class="res-thumb" src="${esc(c.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`
+          : `<div class="res-thumb none">${esc(c.platform)}</div>`}
+        <div class="res-body">
+          <h3>${esc(c.title)}</h3>
+          <div class="rm">
+            <span class="p">${esc(c.platform)}</span>
+            ${c.author ? `<span>${esc(c.author)}</span>` : ''}
+            ${c.duration ? `<span>${fmt(c.duration)}</span>` : ''}
+            ${c.views ? `<span>${num(c.views)}播放</span>` : ''}
+            ${on ? `<span class="done-tag">已开始</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+      }).join('') + `</div>`;
+  } else if (s.cands){
+    const q = encodeURIComponent(s.q);
+    body = `<div class="seek-empty">
+      两边都没搜到。<br>
+      <a href="https://search.bilibili.com/all?keyword=${q}" target="_blank" rel="noopener">自己去 B站 搜「${esc(s.q)}」</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">去 YouTube 搜</a><br>
+      找到哪条是同版，把链接贴回顶部那栏就行。视频号、抖音上有的片子，也可以用下载工具抓下来直接拖进这个窗口。
+    </div>`;
+  }
+
+  $('#main').innerHTML = `
+    <div class="seek">
+      <h1>找同版</h1>
+      <p class="lead">${esc(s.note || '把标题贴进来，我去 B站 和 YouTube 找同一个视频。挑到对的那条，点一下就开始转写。')}</p>
+      <div class="seek-row">
+        <input id="seekQ" placeholder="视频标题，或者标题加作者名" value="${esc(s.q)}" spellcheck="false" autocomplete="off">
+        <button id="seekGo">搜索</button>
+      </div>
+      <p class="hintline">时长、作者都对得上的那条，通常就是同版。</p>
+      ${body}
+    </div>`;
+
+  const go = ()=>{
+    const v = $('#seekQ').value.trim();
+    if (!v) return;
+    state.seek.q = v;
+    runSeek();
+  };
+  $('#seekGo').onclick = go;
+  $('#seekQ').addEventListener('keydown', e=>{ if (e.key === 'Enter') go(); });
+  if (!s.q) setTimeout(()=>{ const el = $('#seekQ'); if (el) el.focus(); }, 30);
+  $('#main').querySelectorAll('.res-item').forEach(el=>{
+    const i = +el.dataset.i;
+    const pick = async ()=>{
+      // 点下去立刻有反应：先标成已开始，再去发请求。
+      // 之前是等请求回来才变，几秒钟没动静，人以为没点上就又点一遍。
+      if (el.classList.contains('picked')) return;
+      state.seek.picked = state.seek.picked || {};
+      if (state.seek.picked[i]) return;
+      state.seek.picked[i] = 'pending';
+      el.classList.add('picked');
+      const rm = el.querySelector('.rm');
+      if (rm) rm.insertAdjacentHTML('beforeend', '<span class="done-tag">开始中…</span>');
+
+      const jid = await startUrl(state.seek.cands[i].url);
+      if (!jid && state.seek){
+        // 没成功就把标记撤掉，别让人对着一个假的「已开始」等
+        delete state.seek.picked[i];
+        el.classList.remove('picked');
+        const t = el.querySelector('.done-tag');
+        if (t) t.remove();
+        return;
+      }
+      if (state.seek) state.seek.picked[i] = jid;
+    };
+    el.onclick = pick;
+    el.onkeydown = e=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } };
+  });
+}
+
+async function runSeek(){
+  const q = (state.seek && state.seek.q || '').trim();
+  if (!q){ const el = $('#seekQ'); if (el) el.focus(); return; }
+  state.seek.busy = true;
+  state.seek.cands = null;
+  state.seek.picked = {};
+  renderSeek();
+  try{
+    const r = await fetch('/api/search', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({q})
+    });
+    const data = await r.json();
+    state.seek.cands = data.candidates || [];
+  }catch(e){
+    state.seek.cands = [];
+  }
+  state.seek.busy = false;
+  renderSeek();
+}
+
+function hostOf(u){
+  try{ return new URL(u).hostname.replace(/^www\./, ''); }catch(e){ return ''; }
+}
+
+function renderJobs(){
+  const box = $('#jobs');
+  const all = Object.values(state.jobs).sort((a,b)=>(a.created||0)-(b.created||0));
+  const waitingAll = all.filter(j=>j.stage === '排队');
+  if (!all.length){ box.innerHTML = ''; return; }
+
+  // 在跑的全都露出来，排队的只露前三个 —— 排了几十个的时候，卡片会淹掉整个侧栏
+  const running = all.filter(j=>j.stage !== '排队');
+  const shownWait = waitingAll.slice(0, 3);
+  const shown = all.filter(j=>running.includes(j) || shownWait.includes(j));
+  const rest = all.length - shown.length;
+
+  box.innerHTML = shown.map(j=>{
+    const waiting = j.stage === '排队';
+    const stopped = j.stage === '已停止';
+    const right = waiting ? (j.ahead > 0 ? `前面还有 ${j.ahead} 个` : '排队中')
+                          : stopped ? '已停止' : `${j.percent||0}%`;
+    const title = j.title || hostOf(j.url) || j.stage || '开始';
+    const lines = (j.log||[]).slice(-2).map(l=>`<div>${esc(l)}</div>`).join('');
+    const acts = j.stage === '失败' ? `
+      <div class="acts">
+        <button data-try="${esc(j.id)}">找同版</button>
+        <button data-file="1">本地文件</button>
+      </div>` : '';
+    return `
+    <div class="job ${j.stage==='失败'?'err':''} ${stopped?'stop':''} ${waiting?'wait':''}">
+      ${stopped ? '' : `<button class="x" data-stop="${esc(j.id)}" title="${waiting?'从队列移除':'停止这个任务'}">×</button>`}
+      <div class="stage"><b>${esc(title)}</b><span>${esc(right)}</span></div>
+      <div class="bar"><i style="width:${waiting?0:(j.percent||0)}%"></i></div>
+      ${lines ? `<div class="log">${lines}</div>` : ''}
+      ${acts}
+    </div>`;
+  }).join('') + (rest > 0 ? `<div class="job-more">另有 ${rest} 个在排队</div>` : '')
+    + (waitingAll.length >= 2
+        ? `<div class="job-more"><button class="qc" data-clear="1">清空排队中的 ${waitingAll.length} 个</button></div>`
+        : '');
+}
+
+async function stopJob(id){
+  const j = state.jobs[id];
+  if (!j) return;
+  j._frozen = true;              // 先冻住轮询，免得点完又被刷回来
+  delete state.jobs[id];
+  renderJobs();
+  try{
+    await fetch('/api/job/'+id+'/cancel', {method:'POST'});
+    toast(j.stage === '排队' ? '已从队列移除' : '已停止');
+  }catch(e){ toast('停止失败，服务还在跑吗'); }
+}
+
+async function clearQueue(){
+  const n = Object.values(state.jobs).filter(j=>j.stage === '排队').length;
+  if (!n) return;
+  if (!confirm(`清空排队中的 ${n} 个任务？正在转写的不受影响。`)) return;
+  Object.keys(state.jobs).forEach(id=>{
+    if (state.jobs[id].stage === '排队') delete state.jobs[id];
+  });
+  renderJobs();
+  try{
+    const r = await (await fetch('/api/queue/clear', {method:'POST'})).json();
+    toast(`已清空 ${r.cleared || n} 个排队任务`);
+  }catch(e){ toast('清空失败'); }
+}
+
+function ensurePoll(){
+  if (state.poll) return;
+  state.poll = setInterval(pollAll, 900);
+}
+
+async function pollAll(){
+  const all = Object.keys(state.jobs);
+  const ids = all.filter(id => !state.jobs[id]._frozen && !state.jobs[id]._up);
+  if (!ids.length){
+    if (!all.some(id => state.jobs[id]._up)){ clearInterval(state.poll); state.poll = null; }
+    renderJobs(); return;
+  }
+  const finished = [];
+  for (const id of ids){
+    let j = null;
+    try{ const r = await fetch('/api/job/'+id); if (r.ok) j = await r.json(); }catch(e){}
+    if (!j){ delete state.jobs[id]; continue; }
+    state.jobs[id] = j;
+    if (j.done) finished.push(j);
+  }
+  renderJobs();
+  finished.forEach(afterJob);
+}
+
+function afterJob(j){
+  if (j.stage === '已停止'){
+    // 主动停的，不算失败，也不必弹消息打扰
+    delete state.jobs[j.id];
+    renderJobs();
+    return;
+  }
+  if (j.error){
+    // 失败的留在侧栏里看一会儿，别一闪就没了
+    state.jobs[j.id] = Object.assign({}, state.jobs[j.id] || {}, j, {_frozen:true});
+    setTimeout(()=>{ delete state.jobs[j.id]; renderJobs(); }, 9000);
+    renderJobs();
+    toast('《' + (j.title || '有一条') + '》失败了');
+    return;
+  }
+  delete state.jobs[j.id];
+  renderJobs();
+  toast('《' + (j.title || '稿') + '》转好了');
+  loadLib();
+  if (j.item_id && (state.pendingOpen || !state.current)){ state.pendingOpen = false; openItem(j.item_id); }
+}
+
+/* 刷新页面或重开窗口时，把还在跑的任务重新接管过来 */
+async function adoptJobs(){
+  try{
+    const data = await (await fetch('/api/jobs')).json();
+    (data.jobs || []).forEach(j=>{ if (!state.jobs[j.id]) state.jobs[j.id] = j; });
+    if (Object.keys(state.jobs).length){ renderJobs(); ensurePoll(); }
+  }catch(e){}
+}
+
+/* 失败卡片上的两个出口：去找同版，或者换成手里的文件 */
+$('#jobs').addEventListener('click', e=>{
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.try){
+    const j = state.jobs[b.dataset.try] || {};
+    openSeek((j.title || '').trim(), '这条没取到。把标题贴进来，我去 B站 和 YouTube 找同版。');
+  }
+  if (b.dataset.file) $('#file').click();
+  if (b.dataset.stop) stopJob(b.dataset.stop);
+  if (b.dataset.clear) clearQueue();
+});
+
+/* ---------- 拖文件进来就转 ---------- */
+let dragDepth = 0;
+window.addEventListener('dragenter', e=>{
+  if (!Array.from((e.dataTransfer && e.dataTransfer.types) || []).includes('Files')) return;
+  e.preventDefault();
+  dragDepth++;
+  document.body.classList.add('dragging');
+});
+window.addEventListener('dragover', e=>{ if (document.body.classList.contains('dragging')) e.preventDefault(); });
+window.addEventListener('dragleave', ()=>{
+  dragDepth--;
+  if (dragDepth <= 0){ dragDepth = 0; document.body.classList.remove('dragging'); }
+});
+window.addEventListener('drop', e=>{
+  if (!document.body.classList.contains('dragging')) return;
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove('dragging');
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (files && files.length) uploadFiles(files);
+});
+
+/* ---------- 选中文字气泡 ---------- */
+const pop = $('#pop');
+document.addEventListener('mouseup', e=>{
+  if (pop.contains(e.target)) return;
+  setTimeout(()=>{
+    const sel = window.getSelection();
+    const txt = (sel && sel.toString() || '').trim();
+    if (txt.length < 6 || !sel.rangeCount){ pop.classList.remove('on'); state.sel=''; return; }
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    if (!rect.width){ pop.classList.remove('on'); return; }
+    state.sel = txt;
+    pop.classList.add('on');
+    const w = pop.offsetWidth, h = pop.offsetHeight;
+    let left = Math.min(rect.left + rect.width/2 - w/2, innerWidth - w - 12);
+    let top = rect.top - h - 10;
+    if (top < 70) top = rect.bottom + 10;
+    pop.style.left = Math.max(12, left)+'px';
+    pop.style.top = top+'px';
+  }, 12);
+});
+document.addEventListener('mousedown', e=>{
+  if (!pop.contains(e.target)) pop.classList.remove('on');
+});
+
+pop.addEventListener('click', async e=>{
+  const act = e.target.dataset.act;
+  if (!act || !state.sel) return;
+  const txt = state.sel;
+  pop.classList.remove('on');
+
+  if (act === 'copy'){
+    await navigator.clipboard.writeText(txt);
+    toast('已复制');
+  }
+  if (act === 'clip'){
+    const item = state.items.find(i=>i.id===state.current);
+    clips.unshift({
+      id: Date.now().toString(36),
+      text: txt,
+      title: item ? item.title : '',
+      at: new Date().toLocaleDateString('zh-CN')
+    });
+    saveClips();
+    $('#clips').classList.add('open');
+    toast('已摘抄');
+  }
+  if (act === 'ask'){
+    const item = state.items.find(i=>i.id===state.current);
+    const prompt =
+`我在读一段视频的文字稿${item?`，标题是《${item.title}》`:''}。下面是其中一段，我想听不同的看法，不必附和：
+
+「${txt}」
+
+请从这几个角度说：这段话成立的前提是什么；有没有明显的反例或例外；如果作者是错的，最可能错在哪一步。请直接说观点，不要先复述我的原文。`;
+    await navigator.clipboard.writeText(prompt);
+    toast('提问已复制，粘给任意 AI 即可');
+  }
+});
+
+/* ---------- 摘抄夹 ---------- */
+function renderClips(){
+  $('#clipCount').textContent = clips.length + ' 条';
+  const box = $('#clipBody');
+  if (!clips.length){
+    box.innerHTML = '<p class="clip-empty">读稿时选中文字，点「摘抄」就会落到这里。攒够几条，可以一次性复制成一份提问清单。</p>';
+    return;
+  }
+  box.innerHTML = clips.map(c=>`
+    <div class="clip">
+      <p>${esc(c.text)}</p>
+      <div class="cf"><span>${esc(c.title||'')} · ${esc(c.at||'')}</span><button data-x="${c.id}">移除</button></div>
+    </div>`).join('');
+  box.querySelectorAll('[data-x]').forEach(b=>{
+    b.onclick = ()=>{ clips = clips.filter(c=>c.id!==b.dataset.x); saveClips(); };
+  });
+}
+
+$('#clipToggle').onclick = ()=> $('#clips').classList.toggle('open');
+$('#shelfBtn').onclick = ()=> document.body.classList.toggle('shelf-open');
+$('#scrim').onclick = ()=> document.body.classList.remove('shelf-open');
+
+/* ---------- 设置 ---------- */
+$('#settings').onclick = async ()=>{
+  const c = await (await fetch('/api/config')).json();
+  $('#cfgSubs').value = c.prefer_subs === false ? '0' : '1';
+  $('#cfgModel').value = c.model || 'small';
+  $('#cfgLang').value = c.language || 'auto';
+  $('#cfgJobs').value = String(c.concurrency || 2);
+  $('#cfgChars').value = String(c.paragraph_chars || 140);
+  $('#cfgPause').value = String(c.pause_seconds || 0.9);
+  $('#cfgCookie').value = c.cookies_browser || '';
+  $('#cfgProxy').value = c.proxy || '';
+  $('#dlg').showModal();
+};
+$('#dlgClose').onclick = ()=> $('#dlg').close();
+$('#dlgSave').onclick = async ()=>{
+  await fetch('/api/config', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      prefer_subs: $('#cfgSubs').value === '1',
+      model: $('#cfgModel').value,
+      language: $('#cfgLang').value,
+      concurrency: Number($('#cfgJobs').value),
+      paragraph_chars: Number($('#cfgChars').value),
+      pause_seconds: Number($('#cfgPause').value),
+      cookies_browser: $('#cfgCookie').value,
+      proxy: $('#cfgProxy').value.trim()
+    })
+  });
+  $('#dlg').close();
+  toast('设置已存，下一篇生效');
+};
+
+/* ---------- 快捷键 ---------- */
+$('#go').onclick = startJob;
+$('#pick').onclick = ()=> $('#file').click();
+$('#file').onchange = e=>{ uploadFiles(e.target.files); e.target.value = ''; };
+$('#url').addEventListener('keydown', e=>{ if (e.key==='Enter') startJob(); });
+document.addEventListener('keydown', e=>{
+  if ((e.metaKey||e.ctrlKey) && e.key==='k'){ e.preventDefault(); $('#url').focus(); }
+  if (e.key==='Escape'){ pop.classList.remove('on'); }
+});
+
+/* ---------- 启动 ---------- */
+renderClips();
+adoptJobs();
+loadLib();
+</script>
+</body>
+</html>
